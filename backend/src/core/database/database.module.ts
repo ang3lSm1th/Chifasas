@@ -7,6 +7,7 @@ import { Tenant } from '../../modules/tenants/entities/tenant.entity';
 import { User } from '../../modules/users/entities/user.entity';
 import { Role } from '../../modules/users/entities/role.entity';
 import { LoginAttempt } from '../../modules/users/entities/login-attempt.entity';
+import { Shift } from '../../modules/shifts/entities/shift.entity';
 
 @Global()
 @Module({
@@ -22,7 +23,7 @@ import { LoginAttempt } from '../../modules/users/entities/login-attempt.entity'
           username: secrets.user,
           password: secrets.pass,
           database: secrets.database,
-          entities: [Tenant, User, Role, LoginAttempt],
+          entities: [Tenant, User, Role, LoginAttempt, Shift],
           // REGLA INMUTABLE: synchronize permanente en false para evitar pérdida de datos
           synchronize: false,
           logging: process.env.NODE_ENV === 'development',

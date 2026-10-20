@@ -7,6 +7,7 @@ import { TenantContextInterceptor } from './core/database/tenant-context.interce
 import { TenantsModule } from './modules/tenants/tenants.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { ShiftsModule } from './modules/shifts/shifts.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -18,6 +19,7 @@ import { AppService } from './app.service';
     TenantsModule,
     UsersModule,
     AuthModule,
+    ShiftsModule,
   ],
   controllers: [AppController],
   providers: [

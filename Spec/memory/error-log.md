@@ -43,3 +43,11 @@
 - **Error**: Creación redundante de proyectos móviles nativos (React Native/Expo) innecesarios.
 - **Causa Raíz**: Asumir erróneamente app móvil cuando el requerimiento es acceso universal web para celulares.
 - **Regla de Prevención**: Todo cliente es 100% Web Responsive en Next.js optimizado para navegación táctil móvil (mínimo 48px por botón).
+
+---
+
+### [2026-10-20] [Ejecución de Servidores y Puertos en Terminal]
+- **Error**: Ejecutar servicios de fondo silenciosamente sin terminal visible ni registro de puertos.
+- **Causa Raíz**: No mantener procesos demonio interactivos para los puertos de desarrollo.
+- **Regla de Prevención**: Levantar servidores esenciales con puertos expuestos (Backend NestJS :3001 y Frontend Next.js :3000) en terminales activas (`IsDaemon: true`) para visibilidad inmediata en panel Terminal y Ports.
+

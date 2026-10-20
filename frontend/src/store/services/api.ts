@@ -38,7 +38,7 @@ export const chifaApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Workers', 'Profile', 'Tenants'],
+  tagTypes: ['Workers', 'Profile', 'Tenants', 'Shift'],
   endpoints: (builder) => ({
     // Autenticación
     login: builder.mutation<
@@ -92,6 +92,44 @@ export const chifaApi = createApi({
       }),
       invalidatesTags: ['Workers'],
     }),
+
+    // Turnos de Caja (Fase 2)
+    getCurrentShift: builder.query<
+      {
+        shift: any;
+        isShiftOpen: boolean;
+        status: 'OPEN' | 'CLOSED';
+        isInGracePeriod: boolean;
+        graceExpiresAt: string | null;
+        minutesRemainingInGrace: number | null;
+      },
+      void
+    >({
+      query: () => '/shifts/current',
+      providesTags: ['Shift'],
+    }),
+    openShift: builder.mutation<
+      any,
+      { initialCash: number; notes?: string }
+    >({
+      query: (body) => ({
+        url: '/shifts/open',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Shift'],
+    }),
+    closeShift: builder.mutation<
+      any,
+      { declaredCash: number; notes?: string }
+    >({
+      query: (body) => ({
+        url: '/shifts/close',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Shift'],
+    }),
   }),
 });
 
@@ -103,4 +141,8 @@ export const {
   useCreateWorkerMutation,
   useToggleWorkerStatusMutation,
   useDeleteWorkerMutation,
+  useGetCurrentShiftQuery,
+  useOpenShiftMutation,
+  useCloseShiftMutation,
 } = chifaApi;
+

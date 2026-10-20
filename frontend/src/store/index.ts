@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './slices/authSlice';
+import shiftReducer from './slices/shiftSlice';
 import { chifaApi } from './services/api';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    shift: shiftReducer,
     [chifaApi.reducerPath]: chifaApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
