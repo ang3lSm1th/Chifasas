@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+:root {
+  /* Design System: Executive Precision Dark */
+  --bg-canvas: #0B0F17;
+  --surface-card: #131823;
+  --surface-elevated: #1A2234;
+  --border-subtle: #20293A;
+  
+  --primary: #2563EB;
+  --primary-hover: #1D4ED8;
+  --primary-muted: rgba(37, 99, 235, 0.15);
+
+  --secondary: #10B981;
+  --secondary-hover: #059669;
+  --secondary-muted: rgba(16, 185, 129, 0.15);
+
+  --tertiary: #D97706;
+  --tertiary-hover: #B45309;
+  --tertiary-muted: rgba(217, 119, 6, 0.15);
+
+  --neutral: #757681;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+}
+
+body {
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-inter, system-ui, -apple-system, sans-serif);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Tipografía Monospace para Números, Tiempos y Códigos de Comanda */
+.font-mono-numbers {
+  font-family: var(--font-jetbrains, 'JetBrains Mono', monospace);
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+
+/* Microinteracciones Táctiles de Emil Kowalski */
+.btn-tactile {
+  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 150ms ease,
+              border-color 150ms ease,
+              box-shadow 150ms ease;
+  user-select: none;
+}
+
+.btn-tactile:active {
+  transform: scale(0.97);
+}
+
+/* Scrollbar Minimalista Oscuro */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0F17;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #20293A;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2563EB;
+}

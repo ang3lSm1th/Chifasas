@@ -17,7 +17,7 @@ regex = '''mysql:\/\/[a-zA-Z0-9_\-]+:[^@]+@[a-zA-Z0-9_\.\-]+'''
 tags = ["security", "mysql"]
 
 [allowlist]
-description = "Archivos permitidos (documentación, ejemplos y configuración de infraestructura)"
+description = "Archivos permitidos (documentación, ejemplos, infraestructura y pruebas automatizadas)"
 paths = [
     '''\.env\.example$''',
     '''README\.md$''',
@@ -25,4 +25,7 @@ paths = [
     '''infra\/.*\.sql$''',
     '''infra\/docker-compose.*\.yml$''',
     '''infra\/openbao\/.*$''',
+    '''.*\.spec\.ts$''',
+    '''.*\.test\.ts$''',
+    '''.*e2e-spec\.ts$''',
 ]
