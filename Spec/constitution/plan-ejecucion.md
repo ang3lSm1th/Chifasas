@@ -75,9 +75,9 @@ flowchart TD
 ### Fase 4: [Tarea 4] Comandero Web para Celulares & Despacho Concurrente
 * **Objetivo**: Comandero 100% web optimizado para teléfonos celulares de las meseras.
 * **Entregables**:
-  1. SPA Comandero táctil para navegadores móviles con `cartSlice` en RTK.
+  1. SPA Comandero táctil para navegadores web en teléfonos celulares (100% Web) con `cartSlice` en RTK.
   2. Buscador instantáneo y despacho inmediato vía WebSocket a Caja y Cocinas.
-* **Loop de Rectificación**: Pruebas de concurrencia y ergonomía táctil en múltiples resoluciones móviles.
+* **Loop de Rectificación**: Pruebas de concurrencia y ergonomía táctil en navegadores web de teléfonos celulares (Android e iOS).
 
 ---
 

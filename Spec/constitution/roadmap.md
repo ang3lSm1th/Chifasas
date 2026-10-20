@@ -12,7 +12,7 @@ gantt
     Turnos Multi-Tenant & Sesión Atada al Turno (Keep-Alive / 2-3h post-cierre) :after a1, 3d
     section Tarea 3: Catálogo & KDS Dinámico
     Catálogo Jerárquico, Stock Bebidas & Pantallas KDS 1..N :after a2, 4d
-    section Tarea 4: Comandero Web Móvil
+    section Tarea 4: Comandero Web en Celulares
     Comandero Web para Celulares, Despacho Dual (KDS + Caja) & WebSockets :after a3, 4d
     section Tarea 5: Cobranza & Auditoría
     Caja POS Web, Pasarelas, Arqueo & Reportes Inmutables :after a4, 3d
