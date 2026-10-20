@@ -1,7 +1,7 @@
 # Tech Stack & Arquitectura SaaS - Chifa Mariana & Red Restaurantera
 
-## 1. Patrón Arquitectónico Integral
-La plataforma opera como un **SaaS Multinquilino** basado en un **Monolito Modular** en el backend (NestJS), clientes **Frontend Descentralizados (SPA)** construidos con **Next.js / React**, gestión de estado predecible con **Redux Toolkit (RTK/RTK Query)**, un diseño de élite basado en el sistema **Executive Precision Dark** con principios de interacción de **Emil Kowalski**, y comunicación en tiempo real basada en eventos.
+## 1. Patrón Arquitectónico Integral (100% Web)
+La plataforma opera como un **SaaS Multinquilino 100% Web** basado en un **Monolito Modular** en el backend (NestJS), clientes **Frontend Descentralizados (SPA Web)** construidos con **Next.js / React** (optimizados para desktops, pantallas táctiles KDS y teléfonos celulares de meseras), gestión de estado predecible con **Redux Toolkit (RTK/RTK Query)**, un diseño de élite basado en el sistema **Executive Precision Dark** con principios de interacción de **Emil Kowalski**, y comunicación en tiempo real basada en eventos.
 
 ```mermaid
 graph TD
@@ -10,10 +10,10 @@ graph TD
         TENANT_B[Tenant B: Restaurante X]
     end
 
-    subgraph Frontend_SPAs [Frontend Descentralizado - SPAs Executive Precision Dark]
-        SPA_ADMIN[SPA 1: Caja / Admin / POS\nRTK Store + RTK Query]
-        SPA_KDS[SPAs 2..N: KDS Dinámicas\nFeedback Táctil Emil Kowalski]
-        SPA_MESERA[SPA Comandero Móvil\nJetBrains Mono para Precios/Tiempos]
+    subgraph Frontend_Web_SPAs [Frontend Descentralizado 100% Web - Executive Precision Dark]
+        SPA_ADMIN[SPA 1: Caja / Admin / POS\nPC / Laptop / Tablet Web]
+        SPA_KDS[SPAs 2..N: KDS Dinámicas\nMonitores / Tablets Web]
+        SPA_MESERA[SPA Comandero Meseras\nNavegador Web en Celulares / PWA Táctil]
     end
 
     subgraph Security_Vault [Seguridad Estricta & Secretos]
@@ -46,7 +46,7 @@ graph TD
 
     OPENBAO -.->|Inyección en Memoria| Backend_Modular
     GITLEAKS -.->|Inspección Pre-Commit| Backend_Modular
-    Frontend_SPAs <-->|HTTPS REST & WebSockets| Backend_Modular
+    Frontend_Web_SPAs <-->|HTTPS REST & WebSockets| Backend_Modular
 
     Backend_Modular --> TENANT_CTX
     TENANT_CTX --> SESSION_GUARD
@@ -64,11 +64,14 @@ graph TD
 
 ## 2. Pila Tecnológica Detallada
 
-### 2.1. Frontend: Next.js, Redux Toolkit (RTK) y Emil Kowalski Principles
-- **Framework**: **Next.js** (App Router, React 18/19, TypeScript).
+### 2.1. Frontend Web Universal: Next.js, Redux Toolkit (RTK) y Emil Kowalski Principles
+- **Framework**: **Next.js** (App Router, React 18/19, TypeScript) - **100% Web sin aplicaciones nativas**.
+- **Adaptabilidad a Celulares**:
+  - Comandero para meseras diseñado como **Web App Responsive / PWA Táctil** optimizada para smartphones Android e iOS desde cualquier navegador (Chrome, Safari).
+  - Componentes táctiles con zona de toque ergonómica a una mano (mínimo 48px), carga instantánea y cero recarga de página.
 - **Gestión de Estado**: **Redux Toolkit (RTK)** y **RTK Query**:
   - `shiftSlice`: Estado del turno activo, balance y sincronización de keep-alive.
-  - `cartSlice`: Construcción atómica de comandas por mesa.
+  - `cartSlice`: Construcción atómica de comandas por mesa optimizada para pantallas pequeñas.
   - `kdsSlice`: Comandas en tiempo real agrupadas por estado (`PENDIENTE`, `PREPARANDO`, `LISTO`).
   - `RTK Query`: Caching optimista para catálogo, mesas y usuarios con revalidación en segundo plano.
 - **Design System**: **Executive Precision Dark**:
@@ -89,10 +92,10 @@ graph TD
   - Presión táctil reactiva: `scale(0.97)` en botones en menos de 16ms.
   - Notificaciones flotantes suaves con **Sonner**.
 
-### 2.2. Autenticación y Sesiones: Better Auth
+### 2.2. Autenticación y Sesiones Web: Better Auth
 - **Multi-Tenancy**: Plugin de organizaciones nativo; cada restaurante es una organización aislada.
 - **Shift-Bound Sessions**:
-  - *Turno Abierto*: Renovación automática de sesión (*keep-alive*) para todo el personal.
+  - *Turno Abierto*: Renovación automática de sesión (*keep-alive*) para todo el personal en cualquier dispositivo web.
   - *Post-Cierre de Turno*: Cierre forzado e invalidación de sesiones a las **2 a 3 horas post-cierre** (`closed_at + 150 min`).
 - **Seguridad Perimetral**: Rate limiting anti-fuerza bruta (5 intentos / 5 min), mitigación de timing attacks y cookies `HttpOnly`, `SameSite=Strict`, `Secure`.
 

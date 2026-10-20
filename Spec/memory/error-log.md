@@ -36,3 +36,10 @@
 - **Error**: Fallo de conexión al Docker API daemon (`npipe:////./pipe/dockerDesktopLinuxEngine`).
 - **Causa Raíz**: Docker Desktop cerrado en la máquina host.
 - **Regla de Prevención**: Iniciar Docker Desktop antes de `npm run infra:up` y mantener un mock/fallback seguro en desarrollo para OpenBao.
+
+---
+
+### [2026-10-19] [Arquitectura Cliente 100% Web]
+- **Error**: Creación redundante de proyectos móviles nativos (React Native/Expo) innecesarios.
+- **Causa Raíz**: Asumir erróneamente app móvil cuando el requerimiento es acceso universal web para celulares.
+- **Regla de Prevención**: Todo cliente es 100% Web Responsive en Next.js optimizado para navegación táctil móvil (mínimo 48px por botón).
