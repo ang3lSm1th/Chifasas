@@ -1,0 +1,56 @@
+services:
+  # Base de Datos MySQL 8.0 con Usuario Restringido
+  mysql:
+    image: mysql:8.0.36
+    container_name: chifa_saas_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: RootSecureSuperAdminPass2026!
+      MYSQL_DATABASE: chifa_saas
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+      - mysql_data:/var/lib/mysql
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --sql-mode=STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pRootSecureSuperAdminPass2026!"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - chifa_network
+
+  # Bóveda de Secretos OpenBao (Fork Open Source de Vault)
+  openbao:
+    image: openbao/openbao:2.0.0
+    container_name: chifa_saas_openbao
+    restart: always
+    environment:
+      BAO_DEV_ROOT_TOKEN_ID: chifa_dev_root_token_2026
+      BAO_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+    ports:
+      - "8200:8200"
+    cap_add:
+      - IPC_LOCK
+    command: server -dev
+    healthcheck:
+      test: ["CMD", "bao", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - chifa_network
+
+volumes:
+  mysql_data:
+    name: chifa_mysql_volume
+
+networks:
+  chifa_network:
+    name: chifa_saas_network
+    driver: bridge

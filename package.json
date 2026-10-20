@@ -1,0 +1,24 @@
+{
+  "name": "chifa-mariana-saas",
+  "version": "1.0.0",
+  "description": "Plataforma SaaS Multi-Tenancy para Chifa Mariana & Red Restaurantera",
+  "private": true,
+  "scripts": {
+    "infra:up": "docker compose -f infra/docker-compose.infra.yml up -d",
+    "infra:down": "docker compose -f infra/docker-compose.infra.yml down",
+    "infra:logs": "docker compose -f infra/docker-compose.infra.yml logs -f",
+    "infra:seed": "powershell -ExecutionPolicy Bypass -File infra/openbao/seed-secrets.ps1",
+    "security:scan": "npx gitleaks detect --config .gitleaks.toml --verbose",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@nogoo9/gitleaks": "^8.30.1-post.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.3"
+  },
+  "lint-staged": {
+    "*": [
+      "gitleaks protect --staged --config .gitleaks.toml --verbose"
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+# Configuración de Gitleaks para Chifa Mariana SaaS
+title = "Gitleaks Rule Set - Chifa Mariana SaaS"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "chifa-hardcoded-credentials"
+description = "Detecta asignaciones de contraseñas de base de datos o secretos en código plano"
+regex = '''(?i)(password|secret|jwt_secret|openbao_token|db_pass)\s*[:=]\s*["'][A-Za-z0-9!@#$%^&*()_+=\-`~\[\]{}|;:,.<>?/]{8,}["']'''
+tags = ["security", "credentials"]
+
+[[rules]]
+id = "mysql-connection-string"
+description = "Detecta strings de conexión de MySQL con credenciales embebidas"
+regex = '''mysql:\/\/[a-zA-Z0-9_\-]+:[^@]+@[a-zA-Z0-9_\.\-]+'''
+tags = ["security", "mysql"]
+
+[allowlist]
+description = "Archivos permitidos (documentación, ejemplos y configuración de infraestructura)"
+paths = [
+    '''\.env\.example$''',
+    '''README\.md$''',
+    '''Spec\/.*\.md$''',
+    '''infra\/.*\.sql$''',
+    '''infra\/docker-compose.*\.yml$''',
+    '''infra\/openbao\/.*$''',
+]
