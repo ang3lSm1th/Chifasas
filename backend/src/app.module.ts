@@ -8,6 +8,9 @@ import { TenantsModule } from './modules/tenants/tenants.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ShiftsModule } from './modules/shifts/shifts.module';
+import { KdsModule } from './modules/kds/kds.module';
+import { CatalogModule } from './modules/catalog/catalog.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -20,6 +23,9 @@ import { AppService } from './app.service';
     UsersModule,
     AuthModule,
     ShiftsModule,
+    KdsModule,
+    CatalogModule,
+    InventoryModule,
   ],
   controllers: [AppController],
   providers: [

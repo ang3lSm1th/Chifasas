@@ -4,6 +4,8 @@
   "description": "Plataforma SaaS Multi-Tenancy para Chifa Mariana & Red Restaurantera",
   "private": true,
   "scripts": {
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run start:dev --prefix backend",
     "infra:up": "docker compose -f infra/docker-compose.infra.yml up -d",
     "infra:down": "docker compose -f infra/docker-compose.infra.yml down",
     "infra:logs": "docker compose -f infra/docker-compose.infra.yml logs -f",

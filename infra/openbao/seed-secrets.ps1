@@ -9,8 +9,12 @@ param(
 )
 
 if (-not $BaoAddress) { $BaoAddress = "http://localhost:8200" }
-if (-not $BaoToken)   { $BaoToken   = "chifa_root_token" }
+if (-not $BaoToken)   { $BaoToken   = "chifa_dev_root_token_2026" }
 if (-not $DbUser)     { $DbUser     = "chifa_app" }
+
+if (-not $DbPassword) { $DbPassword = "AppSecureRuntimePass2026!" }
+if (-not $AuthSecret) { $AuthSecret = "chifa_better_auth_dev_secret_key_2026" }
+if (-not $JwtKey)     { $JwtKey     = "chifa_jwt_dev_signing_key_executive_dark_2026" }
 
 $headers = @{
     "X-Vault-Token" = $BaoToken
@@ -26,7 +30,7 @@ $mysqlSecret = @{
         port     = 3306
         database = "chifa_saas"
         user     = $DbUser
-        pass     = ($DbPassword ? $DbPassword : "")
+        pass     = $DbPassword
     }
 } | ConvertTo-Json
 
@@ -40,8 +44,8 @@ try {
 # 2. Guardar configuraciones de Better Auth
 $authSecret = @{
     data = @{
-        auth_key     = ($AuthSecret ? $AuthSecret : "")
-        jwt_key      = ($JwtKey ? $JwtKey : "")
+        auth_key     = $AuthSecret
+        jwt_key      = $JwtKey
         session_name = "chifa_session"
     }
 } | ConvertTo-Json

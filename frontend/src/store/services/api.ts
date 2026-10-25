@@ -38,7 +38,7 @@ export const chifaApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Workers', 'Profile', 'Tenants', 'Shift'],
+  tagTypes: ['Workers', 'Profile', 'Tenants', 'Shift', 'KdsStations', 'Categories', 'Products', 'Inventory'],
   endpoints: (builder) => ({
     // Autenticación
     login: builder.mutation<
@@ -130,6 +130,123 @@ export const chifaApi = createApi({
       }),
       invalidatesTags: ['Shift'],
     }),
+
+    // Pantallas KDS (Fase 3)
+    getKdsStations: builder.query<any[], void>({
+      query: () => '/kds/stations',
+      providesTags: ['KdsStations'],
+    }),
+    getKdsStationById: builder.query<any, string>({
+      query: (id) => `/kds/stations/${id}`,
+      providesTags: ['KdsStations'],
+    }),
+    createKdsStation: builder.mutation<any, { name: string; colorHex?: string; displayOrder?: number }>({
+      query: (body) => ({
+        url: '/kds/stations',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['KdsStations'],
+    }),
+    deleteKdsStation: builder.mutation<{ success: boolean; id: string }, string>({
+      query: (id) => ({
+        url: `/kds/stations/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['KdsStations'],
+    }),
+
+    // Catálogo & Carta (Fase 3)
+    getCategories: builder.query<any[], void>({
+      query: () => '/catalog/categories',
+      providesTags: ['Categories'],
+    }),
+    createCategory: builder.mutation<any, { name: string; type?: 'FOOD' | 'BEVERAGE'; displayOrder?: number }>({
+      query: (body) => ({
+        url: '/catalog/categories',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Categories'],
+    }),
+    deleteCategory: builder.mutation<{ success: boolean; id: number }, number>({
+      query: (id) => ({
+        url: `/catalog/categories/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Categories'],
+    }),
+    getProducts: builder.query<any[], { isBeverage?: boolean } | void>({
+      query: (params) => {
+        let url = '/catalog/products';
+        if (params && params.isBeverage !== undefined) {
+          url += `?isBeverage=${params.isBeverage}`;
+        }
+        return url;
+      },
+      providesTags: ['Products'],
+    }),
+    getFullMenu: builder.query<any[], void>({
+      query: () => '/catalog/menu',
+      providesTags: ['Categories', 'Products'],
+    }),
+    createProduct: builder.mutation<any, {
+      name: string;
+      categoryId: number;
+      subcategoryId?: number;
+      kdsStationId?: string;
+      description?: string;
+      price: number;
+      isBeverage?: boolean;
+      currentStock?: number;
+      minStockAlert?: number;
+    }>({
+      query: (body) => ({
+        url: '/catalog/products',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Products'],
+    }),
+    updateProduct: builder.mutation<any, { id: string; data: any }>({
+      query: ({ id, data }) => ({
+        url: `/catalog/products/${id}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: ['Products'],
+    }),
+    deleteProduct: builder.mutation<{ success: boolean; id: string }, string>({
+      query: (id) => ({
+        url: `/catalog/products/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Products'],
+    }),
+
+    // Inventario de Bebidas (Fase 3)
+    getInventoryAlerts: builder.query<any[], void>({
+      query: () => '/inventory/alerts',
+      providesTags: ['Inventory'],
+    }),
+    getInventoryMovements: builder.query<any[], { productId?: string } | void>({
+      query: (params) => {
+        let url = '/inventory/movements';
+        if (params && params.productId) {
+          url += `?productId=${params.productId}`;
+        }
+        return url;
+      },
+      providesTags: ['Inventory'],
+    }),
+    restockProduct: builder.mutation<any, { productId: string; quantity: number; notes?: string }>({
+      query: (body) => ({
+        url: '/inventory/restock',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Inventory', 'Products'],
+    }),
   }),
 });
 
@@ -144,5 +261,20 @@ export const {
   useGetCurrentShiftQuery,
   useOpenShiftMutation,
   useCloseShiftMutation,
+  useGetKdsStationsQuery,
+  useGetKdsStationByIdQuery,
+  useCreateKdsStationMutation,
+  useDeleteKdsStationMutation,
+  useGetCategoriesQuery,
+  useCreateCategoryMutation,
+  useDeleteCategoryMutation,
+  useGetProductsQuery,
+  useGetFullMenuQuery,
+  useCreateProductMutation,
+  useUpdateProductMutation,
+  useDeleteProductMutation,
+  useGetInventoryAlertsQuery,
+  useGetInventoryMovementsQuery,
+  useRestockProductMutation,
 } = chifaApi;
 

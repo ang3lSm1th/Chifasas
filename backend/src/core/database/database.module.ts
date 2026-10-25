@@ -8,6 +8,11 @@ import { User } from '../../modules/users/entities/user.entity';
 import { Role } from '../../modules/users/entities/role.entity';
 import { LoginAttempt } from '../../modules/users/entities/login-attempt.entity';
 import { Shift } from '../../modules/shifts/entities/shift.entity';
+import { KdsStation } from '../../modules/kds/entities/kds-station.entity';
+import { Category } from '../../modules/catalog/entities/category.entity';
+import { Subcategory } from '../../modules/catalog/entities/subcategory.entity';
+import { Product } from '../../modules/catalog/entities/product.entity';
+import { InventoryMovement } from '../../modules/inventory/entities/inventory-movement.entity';
 
 @Global()
 @Module({
@@ -23,7 +28,18 @@ import { Shift } from '../../modules/shifts/entities/shift.entity';
           username: secrets.user,
           password: secrets.pass,
           database: secrets.database,
-          entities: [Tenant, User, Role, LoginAttempt, Shift],
+          entities: [
+            Tenant,
+            User,
+            Role,
+            LoginAttempt,
+            Shift,
+            KdsStation,
+            Category,
+            Subcategory,
+            Product,
+            InventoryMovement,
+          ],
           // REGLA INMUTABLE: synchronize permanente en false para evitar pérdida de datos
           synchronize: false,
           logging: process.env.NODE_ENV === 'development',

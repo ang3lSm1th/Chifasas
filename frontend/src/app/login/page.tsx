@@ -9,7 +9,7 @@ import { useLoginMutation, useGetTenantsQuery } from '@/store/services/api';
 import { toast } from 'sonner';
 import { Lock, User, Store, ShieldAlert, ArrowRight, Loader2 } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const dispatch = useDispatch();
   const currentTenantId = useSelector((state: RootState) => state.auth.tenantId);
@@ -204,5 +204,19 @@ export default function LoginPage() {
         </p>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="min-h-screen bg-[#07090E] flex items-center justify-center text-slate-500">
+          Cargando login...
+        </div>
+      }
+    >
+      <LoginForm />
+    </React.Suspense>
   );
 }
