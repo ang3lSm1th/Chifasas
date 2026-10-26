@@ -4,21 +4,22 @@ import React, { useEffect, useState, use } from 'react';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
-import { useGetKdsStationByIdQuery } from '@/store/services/api';
+import {
+  useGetKdsStationByIdQuery,
+  useUpdateOrderStatusMutation,
+} from '@/store/services/api';
 import { io, Socket } from 'socket.io-client';
 import { toast } from 'sonner';
 import {
-  MonitorPlay,
   Clock,
   CheckCircle2,
-  AlertCircle,
   Wifi,
   WifiOff,
   Maximize2,
   Minimize2,
   ChefHat,
   ArrowLeft,
-  Volume2,
+  Smartphone,
 } from 'lucide-react';
 
 interface KdsOrderItem {
@@ -40,11 +41,11 @@ interface KdsOrder {
 }
 
 function KdsContent({ stationId }: { stationId: string }) {
-
   const { tenantId } = useSelector((state: RootState) => state.auth);
   const effectiveTenantId = tenantId || 'chifa-mariana';
 
-  const { data: station, isLoading: isStationLoading } = useGetKdsStationByIdQuery(stationId);
+  const { data: station } = useGetKdsStationByIdQuery(stationId);
+  const [updateOrderStatus] = useUpdateOrderStatusMutation();
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -107,7 +108,7 @@ function KdsContent({ stationId }: { stationId: string }) {
         gain.connect(audioCtx.destination);
         osc.start();
         osc.stop(audioCtx.currentTime + 0.4);
-      } catch (e) {
+      } catch {
         // Silencioso si audio no permitido por navegador
       }
 
@@ -133,9 +134,27 @@ function KdsContent({ stationId }: { stationId: string }) {
     });
   };
 
-  const markOrderReady = (orderId: string) => {
-    setOrders((prev) => prev.filter((o) => o.orderId !== orderId));
-    toast.success(`Comanda #${orderId} completada y despachada`);
+  const markOrderReady = async (order: KdsOrder) => {
+    setOrders((prev) => prev.filter((o) => o.orderId !== order.orderId));
+
+    // Notificar por WebSocket al Comandero Móvil y a Caja
+    if (socket) {
+      socket.emit('kds:mark_order_ready', {
+        tenantId: effectiveTenantId,
+        orderId: order.orderId,
+        stationId,
+        stationName: station?.name || 'Cocina',
+        tableNumber: order.tableNumber || 'Salón',
+      });
+    }
+
+    try {
+      await updateOrderStatus({ id: order.orderId, status: 'READY' }).unwrap();
+    } catch {
+      // Si es una comanda simulada sólo por WS, igual se notificó por socket
+    }
+
+    toast.success(`Comanda #${order.orderId.slice(-6).toUpperCase()} lista y notificada a salón`);
   };
 
   const toggleFullscreen = () => {
@@ -187,7 +206,15 @@ function KdsContent({ stationId }: { stationId: string }) {
         </div>
 
         {/* Indicadores de Estado & Botones */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/comandero"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 hover:bg-blue-600/30 text-xs font-medium transition active:scale-[0.97]"
+          >
+            <Smartphone className="w-3.5 h-3.5" />
+            Comandero
+          </Link>
+
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-800/80 border border-gray-700 text-xs">
             {isConnected ? (
               <>
@@ -318,7 +345,7 @@ function KdsContent({ stationId }: { stationId: string }) {
                   {/* Botón de Despacho Completo */}
                   <div className="p-3 bg-[#0D111A] border-t border-gray-800">
                     <button
-                      onClick={() => markOrderReady(order.orderId)}
+                      onClick={() => markOrderReady(order)}
                       className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm tracking-wide rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-600/30 active:scale-[0.97]"
                     >
                       <CheckCircle2 className="w-5 h-5" />
@@ -342,7 +369,13 @@ function KdsScreenInner({ params }: { params: Promise<{ stationId: string }> }) 
 
 export default function KdsScreenPage({ params }: { params: Promise<{ stationId: string }> }) {
   return (
-    <React.Suspense fallback={<div className="min-h-screen bg-[#07090E] flex items-center justify-center text-slate-500">Cargando KDS...</div>}>
+    <React.Suspense
+      fallback={
+        <div className="min-h-screen bg-[#07090E] flex items-center justify-center text-slate-500">
+          Cargando KDS...
+        </div>
+      }
+    >
       <KdsScreenInner params={params} />
     </React.Suspense>
   );

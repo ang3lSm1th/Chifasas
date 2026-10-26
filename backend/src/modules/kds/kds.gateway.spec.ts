@@ -79,5 +79,19 @@ describe('KdsGateway', () => {
         total: 45.0,
       });
     });
+
+    it('debe suscribir y notificar a la sala de Meseras (Comandero Móvil)', () => {
+      const joinRes = gateway.handleJoinWaiters(mockSocket, {
+        tenantId: 'chifa-mariana',
+      });
+      expect(joinRes.success).toBe(true);
+      expect(joinRes.room).toBe('room:tenant_chifa-mariana:waiters');
+
+      gateway.notifyWaiters('chifa-mariana', 'order:status_updated', {
+        orderId: 'ord-101',
+        status: 'READY',
+      });
+      expect(mockServer.to).toHaveBeenCalledWith('room:tenant_chifa-mariana:waiters');
+    });
   });
 });

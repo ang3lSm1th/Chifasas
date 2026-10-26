@@ -15,6 +15,8 @@ export default function HomePage() {
       router.push('/login');
     } else if (user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') {
       router.push('/admin/trabajadores');
+    } else if (user?.role === 'MESERA') {
+      router.push('/comandero');
     } else {
       router.push('/caja/turno');
     }

@@ -11,6 +11,7 @@ import { ShiftsModule } from './modules/shifts/shifts.module';
 import { KdsModule } from './modules/kds/kds.module';
 import { CatalogModule } from './modules/catalog/catalog.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
+import { OrdersModule } from './modules/orders/orders.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -26,6 +27,7 @@ import { AppService } from './app.service';
     KdsModule,
     CatalogModule,
     InventoryModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [

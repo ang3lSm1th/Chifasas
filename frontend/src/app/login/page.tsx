@@ -60,6 +60,8 @@ function LoginForm() {
       // Redirección según rol
       if (response.user.role === 'ADMIN' || response.user.role === 'SUPER_ADMIN') {
         router.push('/admin/trabajadores');
+      } else if (response.user.role === 'MESERA') {
+        router.push('/comandero');
       } else {
         router.push('/caja/turno');
       }

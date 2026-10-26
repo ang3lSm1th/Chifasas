@@ -51,3 +51,10 @@
 - **Causa Raíz**: No mantener procesos demonio interactivos para los puertos de desarrollo.
 - **Regla de Prevención**: Levantar servidores esenciales con puertos expuestos (Backend NestJS :3001 y Frontend Next.js :3000) en terminales activas (`IsDaemon: true`) para visibilidad inmediata en panel Terminal y Ports.
 
+
+---
+
+### [2026-10-25] [Frontend Next.js 16 & Turbopack en Worktrees]
+- **Error**: Fallo en `next build` (`Could not find the Next.js package`) al usar Junction/Symlink de `node_modules` hacia otro disco o ruta externa.
+- **Causa Raíz**: Turbopack bloquea la resolución de paquetes fuera de `turbopack.root` por aislamiento hermético.
+- **Regla de Prevención**: Instalar `frontend/node_modules` localmente dentro del worktree y fijar `turbopack.root: path.resolve(__dirname)` en `next.config.ts`.

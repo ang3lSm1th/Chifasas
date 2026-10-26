@@ -2,23 +2,33 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store';
+import { pushCashierTicket } from '@/store/slices/kdsSlice';
 import {
   useGetCurrentShiftQuery,
   useOpenShiftMutation,
   useCloseShiftMutation,
+  useGetOrdersQuery,
 } from '../../../store/services/api';
+import { io } from 'socket.io-client';
+import { Smartphone, Wifi, Receipt, Clock } from 'lucide-react';
 
 export default function TurnoCajaPage() {
-  const router = useRouter();
+  const dispatch = useDispatch();
   const { user, tenantId } = useSelector((state: RootState) => state.auth);
+  const effectiveTenantId = tenantId || 'chifa-mariana';
+  const liveCashierFeed = useSelector((state: RootState) => state.kds.cashierFeed);
 
-  const { data: shiftData, isLoading, refetch } = useGetCurrentShiftQuery(undefined, {
-    pollingInterval: 15000, // Refresco cada 15s para sincronizar estado
+  const { data: shiftData, refetch } = useGetCurrentShiftQuery(undefined, {
+    pollingInterval: 15000,
   });
+
+  const { data: activeOrders, refetch: refetchOrders } = useGetOrdersQuery(
+    { activeOnly: true },
+    { pollingInterval: 10000 },
+  );
 
   const [openShift, { isLoading: isOpening }] = useOpenShiftMutation();
   const [closeShift, { isLoading: isClosing }] = useCloseShiftMutation();
@@ -34,12 +44,49 @@ export default function TurnoCajaPage() {
   // Formulario Cierre / Arqueo
   const [declaredCash, setDeclaredCash] = useState<number>(0);
   const [closeNotes, setCloseNotes] = useState('');
+  const [isCashierSocketConnected, setIsCashierSocketConnected] = useState(false);
 
   useEffect(() => {
     if (shiftData?.shift?.expectedCash !== undefined) {
       setDeclaredCash(Number(shiftData.shift.expectedCash));
     }
   }, [shiftData]);
+
+  // Suscripción en tiempo real a la Sala Inmutable de Caja (Regla Inmutable de Despacho)
+  useEffect(() => {
+    const socketUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:4000/kds';
+    const s = io(socketUrl, {
+      transports: ['websocket', 'polling'],
+      withCredentials: true,
+    });
+
+    s.on('connect', () => {
+      setIsCashierSocketConnected(true);
+      s.emit('join_cashier', { tenantId: effectiveTenantId });
+    });
+
+    s.on('disconnect', () => {
+      setIsCashierSocketConnected(false);
+    });
+
+    s.on('cashier:order_ticket', (payload: any) => {
+      dispatch(pushCashierTicket(payload));
+      refetchOrders();
+      toast.info(
+        `[Caja] Nueva comanda recibida de ${payload.tableNumber || 'Salón'} (S/ ${Number(
+          payload.totalAmount || 0,
+        ).toFixed(2)})`,
+      );
+    });
+
+    s.on('order:status_updated', () => {
+      refetchOrders();
+    });
+
+    return () => {
+      s.disconnect();
+    };
+  }, [effectiveTenantId, dispatch, refetchOrders]);
 
   const handleOpenShift = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +118,7 @@ export default function TurnoCajaPage() {
     }
 
     try {
-      const res = await closeShift({
+      await closeShift({
         declaredCash: Number(declaredCash),
         notes: closeNotes.trim() || undefined,
       }).unwrap();
@@ -96,12 +143,14 @@ export default function TurnoCajaPage() {
   const expectedCash = activeShift ? Number(activeShift.expectedCash) : 0;
   const currentDifference = declaredCash - expectedCash;
 
+  const displayedOrders = activeOrders && activeOrders.length > 0 ? activeOrders : liveCashierFeed;
+
   return (
     <div className="min-h-screen bg-[#0B0F17] text-[#F8FAFC] p-4 md:p-8 flex flex-col font-sans">
       {/* Header Superior y Barra de Navegación */}
       <header className="max-w-6xl w-full mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-[#20293A] gap-4">
         <div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#F8FAFC]">
               Caja & Control de Turnos
             </h1>
@@ -123,21 +172,36 @@ export default function TurnoCajaPage() {
             )}
           </div>
           <p className="text-sm text-[#757681] mt-1">
-            Restaurante: <span className="text-[#F8FAFC] font-medium">{tenantId || 'chifa-mariana'}</span> | Operador: <span className="text-[#F8FAFC] font-medium">{user?.fullName || 'Personal'}</span>
+            Restaurante:{' '}
+            <span className="text-[#F8FAFC] font-medium">{effectiveTenantId}</span> | Operador:{' '}
+            <span className="text-[#F8FAFC] font-medium">{user?.fullName || 'Personal'}</span>
           </p>
         </div>
 
         {/* Accesos Rápidos */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <Link
+            href="/comandero"
+            className="px-4 py-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold flex items-center gap-1.5 transition-all duration-150 active:scale-[0.97] shadow-lg shadow-[#2563EB]/20"
+          >
+            <Smartphone className="w-4 h-4" />
+            Comandero Móvil
+          </Link>
+          <Link
+            href="/admin/carta"
+            className="px-3.5 py-2 rounded-lg bg-[#131823] hover:bg-[#1A2234] border border-[#20293A] text-xs text-[#94A3B8] hover:text-[#F8FAFC] transition-all duration-150 active:scale-[0.97]"
+          >
+            Carta
+          </Link>
           <Link
             href="/admin/trabajadores"
-            className="px-4 py-2 rounded-lg bg-[#131823] hover:bg-[#1A2234] border border-[#20293A] text-sm text-[#94A3B8] hover:text-[#F8FAFC] transition-all duration-150 active:scale-97"
+            className="px-3.5 py-2 rounded-lg bg-[#131823] hover:bg-[#1A2234] border border-[#20293A] text-xs text-[#94A3B8] hover:text-[#F8FAFC] transition-all duration-150 active:scale-[0.97]"
           >
             Personal
           </Link>
           <Link
             href="/login"
-            className="px-4 py-2 rounded-lg bg-[#131823] hover:bg-[#1A2234] border border-[#20293A] text-sm text-[#94A3B8] hover:text-[#F8FAFC] transition-all duration-150 active:scale-97"
+            className="px-3.5 py-2 rounded-lg bg-[#131823] hover:bg-[#1A2234] border border-[#20293A] text-xs text-[#94A3B8] hover:text-[#F8FAFC] transition-all duration-150 active:scale-[0.97]"
           >
             Cambiar Sesión
           </Link>
@@ -196,9 +260,7 @@ export default function TurnoCajaPage() {
                 S/ {activeShift ? Number(activeShift.initialCash).toFixed(2) : '0.00'}
               </span>
             </div>
-            <span className="text-xs text-[#757681] mt-2">
-              Ingresado en apertura
-            </span>
+            <span className="text-xs text-[#757681] mt-2">Ingresado en apertura</span>
           </div>
 
           <div className="p-5 rounded-xl bg-[#131823] border border-[#20293A] flex flex-col justify-between">
@@ -252,6 +314,92 @@ export default function TurnoCajaPage() {
               {isShiftOpen ? 'Comandas habilitadas' : 'Comandas bloqueadas (412)'}
             </span>
           </div>
+        </div>
+
+        {/* MONITOR EN TIEMPO REAL DE COMANDAS RECIBIDAS EN CAJA (REGLA INMUTABLE) */}
+        <div className="p-6 rounded-xl bg-[#131823] border border-[#20293A] flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#20293A]">
+            <div className="flex items-center gap-2.5">
+              <Receipt className="w-5 h-5 text-[#10B981]" />
+              <div>
+                <h2 className="text-lg font-semibold text-[#F8FAFC]">
+                  Recepción Inmutable de Comandas en Caja (Tiempo Real)
+                </h2>
+                <p className="text-xs text-[#94A3B8]">
+                  Todo pedido enviado desde los celulares de meseras llega íntegro aquí en paralelo a las pantallas KDS.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono ${
+                  isCashierSocketConnected
+                    ? 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30'
+                    : 'bg-[#757681]/15 text-[#757681]'
+                }`}
+              >
+                <Wifi className="w-3.5 h-3.5" />
+                {isCashierSocketConnected ? 'SALA CAJA ACTIVA' : 'CONECTANDO...'}
+              </span>
+            </div>
+          </div>
+
+          {displayedOrders && displayedOrders.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {displayedOrders.map((ord: any) => (
+                <div
+                  key={ord.id || ord.orderId}
+                  className="p-4 rounded-xl bg-[#0B0F17] border border-[#20293A] flex flex-col justify-between gap-3"
+                >
+                  <div className="flex items-start justify-between border-b border-[#20293A] pb-2">
+                    <div>
+                      <span className="px-2 py-0.5 rounded bg-[#2563EB]/20 text-[#60A5FA] font-mono font-bold text-xs">
+                        {ord.tableNumber || 'Salón'}
+                      </span>
+                      <p className="text-xs font-mono text-[#757681] mt-1">
+                        {ord.orderNumber || `#${String(ord.orderId || ord.id).slice(0, 6)}`}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs font-mono text-[#10B981] font-bold">
+                        S/ {Number(ord.totalAmount || 0).toFixed(2)}
+                      </span>
+                      <p className="text-[11px] text-[#94A3B8] flex items-center justify-end gap-1 mt-0.5">
+                        <Clock className="w-3 h-3" />
+                        {ord.status || 'RECIBIDO'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1 text-xs">
+                    {ord.items?.map((it: any, idx: number) => (
+                      <div key={idx} className="flex justify-between text-[#F8FAFC]">
+                        <span>
+                          <strong className="font-mono text-[#94A3B8]">{it.quantity}x</strong>{' '}
+                          {it.productName}
+                        </span>
+                        <span className="font-mono text-[#94A3B8]">
+                          S/{' '}
+                          {Number(
+                            it.subtotal ?? Number(it.price || it.unitPrice || 0) * it.quantity,
+                          ).toFixed(2)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 text-center text-xs text-[#757681]">
+              Aún no hay comandas activas en este turno. Usa el{' '}
+              <Link href="/comandero" className="text-[#2563EB] underline font-semibold">
+                Comandero Móvil
+              </Link>{' '}
+              para despachar pedidos.
+            </div>
+          )}
         </div>
 
         {/* Detalle del Turno / Historial de Arqueo */}

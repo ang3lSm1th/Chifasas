@@ -38,7 +38,17 @@ export const chifaApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Workers', 'Profile', 'Tenants', 'Shift', 'KdsStations', 'Categories', 'Products', 'Inventory'],
+  tagTypes: [
+    'Workers',
+    'Profile',
+    'Tenants',
+    'Shift',
+    'KdsStations',
+    'Categories',
+    'Products',
+    'Inventory',
+    'Orders',
+  ],
   endpoints: (builder) => ({
     // Autenticación
     login: builder.mutation<
@@ -247,6 +257,68 @@ export const chifaApi = createApi({
       }),
       invalidatesTags: ['Inventory', 'Products'],
     }),
+
+    // Pedidos & Comandero Web para Celulares (Fase 4)
+    createOrder: builder.mutation<
+      any,
+      {
+        orderType?: 'DINE_IN' | 'TAKEAWAY' | 'DELIVERY';
+        tableNumber?: string;
+        customerName?: string;
+        notes?: string;
+        items: { productId: string; quantity: number; notes?: string }[];
+      }
+    >({
+      query: (body) => ({
+        url: '/orders',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Orders', 'Products', 'Inventory', 'Shift'],
+    }),
+    getOrders: builder.query<
+      any[],
+      { status?: string; tableNumber?: string; activeOnly?: boolean } | void
+    >({
+      query: (params) => {
+        const queryParams = new URLSearchParams();
+        if (params?.status) queryParams.set('status', params.status);
+        if (params?.tableNumber) queryParams.set('tableNumber', params.tableNumber);
+        if (params?.activeOnly !== undefined) {
+          queryParams.set('activeOnly', String(params.activeOnly));
+        }
+        const qs = queryParams.toString();
+        return `/orders${qs ? `?${qs}` : ''}`;
+      },
+      providesTags: ['Orders'],
+    }),
+    getTablesSummary: builder.query<
+      {
+        tables: {
+          tableNumber: string;
+          state: 'FREE' | 'OCCUPIED' | 'READY_TO_SERVE';
+          activeOrdersCount: number;
+          accumulatedTotal: number;
+          latestOrder: any;
+        }[];
+        activeOrdersCount: number;
+      },
+      void
+    >({
+      query: () => '/orders/tables',
+      providesTags: ['Orders'],
+    }),
+    updateOrderStatus: builder.mutation<
+      any,
+      { id: string; status: 'PENDING' | 'PREPARING' | 'READY' | 'SERVED' | 'PAID' | 'CANCELLED' }
+    >({
+      query: ({ id, status }) => ({
+        url: `/orders/${id}/status`,
+        method: 'PATCH',
+        body: { status },
+      }),
+      invalidatesTags: ['Orders'],
+    }),
   }),
 });
 
@@ -276,5 +348,8 @@ export const {
   useGetInventoryAlertsQuery,
   useGetInventoryMovementsQuery,
   useRestockProductMutation,
+  useCreateOrderMutation,
+  useGetOrdersQuery,
+  useGetTablesSummaryQuery,
+  useUpdateOrderStatusMutation,
 } = chifaApi;
-

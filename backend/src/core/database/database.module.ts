@@ -13,6 +13,8 @@ import { Category } from '../../modules/catalog/entities/category.entity';
 import { Subcategory } from '../../modules/catalog/entities/subcategory.entity';
 import { Product } from '../../modules/catalog/entities/product.entity';
 import { InventoryMovement } from '../../modules/inventory/entities/inventory-movement.entity';
+import { Order } from '../../modules/orders/entities/order.entity';
+import { OrderItem } from '../../modules/orders/entities/order-item.entity';
 
 @Global()
 @Module({
@@ -39,6 +41,8 @@ import { InventoryMovement } from '../../modules/inventory/entities/inventory-mo
             Subcategory,
             Product,
             InventoryMovement,
+            Order,
+            OrderItem,
           ],
           // REGLA INMUTABLE: synchronize permanente en false para evitar pérdida de datos
           synchronize: false,
