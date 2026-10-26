@@ -15,6 +15,7 @@ import { Product } from '../../modules/catalog/entities/product.entity';
 import { InventoryMovement } from '../../modules/inventory/entities/inventory-movement.entity';
 import { Order } from '../../modules/orders/entities/order.entity';
 import { OrderItem } from '../../modules/orders/entities/order-item.entity';
+import { Payment } from '../../modules/billing/entities/payment.entity';
 
 @Global()
 @Module({
@@ -43,6 +44,7 @@ import { OrderItem } from '../../modules/orders/entities/order-item.entity';
             InventoryMovement,
             Order,
             OrderItem,
+            Payment,
           ],
           // REGLA INMUTABLE: synchronize permanente en false para evitar pérdida de datos
           synchronize: false,

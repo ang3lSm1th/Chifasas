@@ -12,6 +12,7 @@ import { KdsModule } from './modules/kds/kds.module';
 import { CatalogModule } from './modules/catalog/catalog.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { OrdersModule } from './modules/orders/orders.module';
+import { BillingModule } from './modules/billing/billing.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -28,6 +29,7 @@ import { AppService } from './app.service';
     CatalogModule,
     InventoryModule,
     OrdersModule,
+    BillingModule,
   ],
   controllers: [AppController],
   providers: [

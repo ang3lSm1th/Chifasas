@@ -101,8 +101,10 @@ export class ShiftsService {
     const closedAt = new Date();
     // REGLA OPERATIVA: 150 minutos (2.5 horas) de ventana de gracia post-cierre
     const graceExpiresAt = new Date(closedAt.getTime() + 150 * 60 * 1000);
-    const declaredCash = Number(dto.declaredCash);
-    const difference = declaredCash - Number(activeShift.expectedCash);
+    const declaredCashCents = Math.round(Number(dto.declaredCash) * 100);
+    const expectedCashCents = Math.round(Number(activeShift.expectedCash) * 100);
+    const declaredCash = Number((declaredCashCents / 100).toFixed(2));
+    const difference = Number(((declaredCashCents - expectedCashCents) / 100).toFixed(2));
 
     activeShift.status = 'CLOSED';
     activeShift.closedById = userId;
@@ -218,6 +220,18 @@ export class ShiftsService {
     return this.shiftRepository.findOne({
       where: { tenantId, status: 'CLOSED' },
       order: { closedAt: 'DESC' },
+    });
+  }
+
+  /**
+   * Lista el historial inmutable de turnos y arqueos de caja del restaurante
+   */
+  async getShiftsHistory(tenantId: string): Promise<Shift[]> {
+    return this.shiftRepository.find({
+      where: { tenantId },
+      relations: { openedBy: true, closedBy: true },
+      order: { openedAt: 'DESC' },
+      take: 50,
     });
   }
 }

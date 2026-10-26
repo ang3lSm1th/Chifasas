@@ -48,6 +48,8 @@ export const chifaApi = createApi({
     'Products',
     'Inventory',
     'Orders',
+    'Payments',
+    'Audit',
   ],
   endpoints: (builder) => ({
     // Autenticación
@@ -103,7 +105,7 @@ export const chifaApi = createApi({
       invalidatesTags: ['Workers'],
     }),
 
-    // Turnos de Caja (Fase 2)
+    // Turnos de Caja (Fase 2 & Fase 5)
     getCurrentShift: builder.query<
       {
         shift: any;
@@ -118,6 +120,10 @@ export const chifaApi = createApi({
       query: () => '/shifts/current',
       providesTags: ['Shift'],
     }),
+    getShiftsHistory: builder.query<any[], void>({
+      query: () => '/shifts/history',
+      providesTags: ['Shift', 'Audit'],
+    }),
     openShift: builder.mutation<
       any,
       { initialCash: number; notes?: string }
@@ -127,7 +133,7 @@ export const chifaApi = createApi({
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['Shift'],
+      invalidatesTags: ['Shift', 'Audit'],
     }),
     closeShift: builder.mutation<
       any,
@@ -138,7 +144,7 @@ export const chifaApi = createApi({
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['Shift'],
+      invalidatesTags: ['Shift', 'Audit'],
     }),
 
     // Pantallas KDS (Fase 3)
@@ -319,6 +325,55 @@ export const chifaApi = createApi({
       }),
       invalidatesTags: ['Orders'],
     }),
+
+    // Cobranza POS, Pre-Cuenta y Auditoría Financiera (Fase 5)
+    processPayment: builder.mutation<
+      any,
+      {
+        orderId: string;
+        paymentMethod: 'CASH' | 'YAPE' | 'PLIN' | 'CARD';
+        receiptType?: 'TICKET' | 'BOLETA' | 'FACTURA';
+        cashReceived?: number;
+        operationCode?: string;
+        customerDocument?: string;
+        customerName?: string;
+        notes?: string;
+      }
+    >({
+      query: (body) => ({
+        url: '/billing/pay',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Payments', 'Audit', 'Orders', 'Shift'],
+    }),
+    getPreBill: builder.query<any, string>({
+      query: (orderId) => `/billing/prebill/${orderId}`,
+      providesTags: ['Orders'],
+    }),
+    getPayments: builder.query<any[], { shiftId?: string } | void>({
+      query: (params) => {
+        if (params && params.shiftId) {
+          return `/billing/payments?shiftId=${params.shiftId}`;
+        }
+        return '/billing/payments';
+      },
+      providesTags: ['Payments'],
+    }),
+    getFinancialAudit: builder.query<
+      any,
+      { shiftId?: string; startDate?: string; endDate?: string } | void
+    >({
+      query: (params) => {
+        const qs = new URLSearchParams();
+        if (params?.shiftId) qs.set('shiftId', params.shiftId);
+        if (params?.startDate) qs.set('startDate', params.startDate);
+        if (params?.endDate) qs.set('endDate', params.endDate);
+        const queryStr = qs.toString();
+        return `/billing/audit${queryStr ? `?${queryStr}` : ''}`;
+      },
+      providesTags: ['Audit', 'Payments', 'Shift'],
+    }),
   }),
 });
 
@@ -331,6 +386,7 @@ export const {
   useToggleWorkerStatusMutation,
   useDeleteWorkerMutation,
   useGetCurrentShiftQuery,
+  useGetShiftsHistoryQuery,
   useOpenShiftMutation,
   useCloseShiftMutation,
   useGetKdsStationsQuery,
@@ -352,4 +408,8 @@ export const {
   useGetOrdersQuery,
   useGetTablesSummaryQuery,
   useUpdateOrderStatusMutation,
+  useProcessPaymentMutation,
+  useGetPreBillQuery,
+  useGetPaymentsQuery,
+  useGetFinancialAuditQuery,
 } = chifaApi;

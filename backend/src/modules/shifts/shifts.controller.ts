@@ -29,6 +29,16 @@ export class ShiftsController {
   }
 
   /**
+   * Obtiene el historial inmutable de turnos y arqueos de caja del tenant
+   */
+  @Get('history')
+  @Roles(RoleType.SUPER_ADMIN, RoleType.ADMIN, RoleType.CAJERO)
+  async getShiftsHistory(@Request() req: any) {
+    const tenantId = req.user.tenantId;
+    return this.shiftsService.getShiftsHistory(tenantId);
+  }
+
+  /**
    * Abre formalmente un turno de caja con fondo inicial
    * Restringido a Administradores y Cajeros
    */
