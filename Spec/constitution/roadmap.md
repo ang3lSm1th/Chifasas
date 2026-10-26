@@ -16,8 +16,8 @@ gantt
     Comandero Web para Celulares, Despacho Dual (KDS + Caja) & WebSockets :after a3, 4d
     section Tarea 5: Cobranza & Auditoría
     Caja POS Web, Pasarelas, Arqueo & Reportes Inmutables :after a4, 3d
-    section Tarea 6: Despliegue Cloud
-    Despliegue en Producción AWS/VPS (Docker, Nginx con SSL) :after a5, 4d
+    section Tarea 6: Despliegue Servidor Local
+    Despliegue en Servidor Local On-Premise (Docker LAN, Nginx, Auto-Backup) :after a5, 4d
 ```
 
 ---
@@ -50,6 +50,7 @@ gantt
 - Cobro en Caja web (Efectivo, Yape, Plin, Tarjetas), pre-cuentas y comprobantes.
 - Arqueo de cierre de turno y reportes analíticos inmutables.
 
-### Tarea 6: Despliegue en Producción Cloud (AWS / VPS)
-- Orquestación con Docker Compose (NestJS, OpenBao, MySQL 8.0, Nginx con SSL).
-- Puesta en marcha en infraestructura cloud y auditoría final de seguridad.
+### Tarea 6: Despliegue en Servidor Local (On-Premise / Red LAN del Restaurante)
+- Orquestación en el servidor físico del local con Docker Compose (`restart: always`: NestJS, Next.js, OpenBao persistente, MySQL 8.0, Reverse Proxy Nginx).
+- Exposición en red LAN privada (IP estática local) para conexión directa de PC de Caja, Pantallas KDS y celulares de meseras por Wi-Fi sin depender de internet externo.
+- Auto-arranque ante cortes eléctricos y respaldos locales automatizados diarios (`mysqldump --single-transaction` bajo regla Zero Data Loss).

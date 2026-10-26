@@ -91,9 +91,10 @@ flowchart TD
 
 ---
 
-### Fase 6: [Tarea 6] Despliegue en Producción Cloud (AWS / VPS)
-* **Objetivo**: Puesta en marcha en infraestructura cloud.
+### Fase 6: [Tarea 6] Despliegue en Servidor Local (On-Premise / Red LAN del Restaurante)
+* **Objetivo**: Puesta en marcha autónoma en el servidor físico local del restaurante, permitiendo que la PC de Caja, las Pantallas KDS (1..N) y los celulares de las meseras operen en la red privada LAN / Wi-Fi con latencia ultra-baja (<5ms) y sin depender de internet externo (ISP).
 * **Entregables**:
-  1. Orquestación completa con Docker Compose: NestJS Monolito, OpenBao, MySQL 8.0, Nginx con SSL y headers de seguridad.
-  2. Documentación operativa y manual de despliegue en AWS / VPS.
-* **Loop de Rectificación**: Auditoría final de seguridad y escaneo de vulnerabilidades previo al pase a producción.
+  1. Orquestación local completa (`infra/docker-compose.prod.yml`) con políticas `restart: always`: NestJS Monolito, Next.js Frontend, OpenBao con almacenamiento persistente en disco, MySQL 8.0 (usuario PoLP sin `DROP`/`TRUNCATE`) y Reverse Proxy local (Nginx).
+  2. Configuración de red LAN (IP estática local, reglas de Firewall en red privada y enrutamiento unificado HTTP/HTTPS + WebSockets `/socket.io/*` en el mismo origen LAN).
+  3. Scripts de auto-arranque ante cortes eléctricos y respaldos diarios automatizados de la base de datos (`infra/scripts/backup-local.ps1` con `mysqldump --single-transaction` en disco local/externo bajo regla Zero Data Loss).
+* **Loop de Rectificación**: Simulación de caída de internet externo (modo LAN puro), reinicio del servidor local y verificación de integridad del backup local previo al pase a producción.

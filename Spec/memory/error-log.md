@@ -49,8 +49,7 @@
 ### [2026-10-20] [Ejecución de Servidores y Puertos en Terminal]
 - **Error**: Ejecutar servicios de fondo silenciosamente sin terminal visible ni registro de puertos.
 - **Causa Raíz**: No mantener procesos demonio interactivos para los puertos de desarrollo.
-- **Regla de Prevención**: Levantar servidores esenciales con puertos expuestos (Backend NestJS :3001 y Frontend Next.js :3000) en terminales activas (`IsDaemon: true`) para visibilidad inmediata en panel Terminal y Ports.
-
+- **Regla de Prevención**: Levantar servidores esenciales con puertos expuestos (Backend NestJS :4000 y Frontend Next.js :3000) en terminales activas (`IsDaemon: true`) para visibilidad inmediata en panel Terminal y Ports.
 
 ---
 
@@ -58,3 +57,10 @@
 - **Error**: Fallo en `next build` (`Could not find the Next.js package`) al usar Junction/Symlink de `node_modules` hacia otro disco o ruta externa.
 - **Causa Raíz**: Turbopack bloquea la resolución de paquetes fuera de `turbopack.root` por aislamiento hermético.
 - **Regla de Prevención**: Instalar `frontend/node_modules` localmente dentro del worktree y fijar `turbopack.root: path.resolve(__dirname)` en `next.config.ts`.
+
+---
+
+### [2026-10-25] [Next.js 16 & RTK Query (`Date.now()` Prerender Error)]
+- **Error**: `Next.js encountered the unstable value Date.now() in a Client Component` al usar hooks de RTK Query (`useGetCurrentShiftQuery`, etc.).
+- **Causa Raíz**: `cacheComponents: true` en `next.config.ts` bloquea llamadas internas a `Date.now()` de Redux Toolkit Query durante el render inicial.
+- **Regla de Prevención**: Mantener `cacheComponents: false` y definir `turbopack.root` en `frontend/next.config.ts`.
