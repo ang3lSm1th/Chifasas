@@ -76,7 +76,6 @@ describe('ShiftsService & Shift Guards', () => {
 
       mockRepo.findOne.mockResolvedValue(activeShift);
 
-      const beforeClose = Date.now();
       const result = await service.closeShift('chifa-mariana', 'user-cajero-1', {
         declaredCash: 345.0,
         notes: 'Faltante menor de 5 soles',

@@ -61,6 +61,7 @@ export class AuthService {
     // 3. Generar token de sesión firmado criptográficamente
     const secrets = await this.openBaoService.getAuthSecrets();
     const tokenPayload = {
+      id: user.id,
       sub: user.id,
       username: user.username,
       fullName: user.fullName,
@@ -99,6 +100,9 @@ export class AuthService {
       }
 
       const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+      if (payload && !payload.id && payload.sub) {
+        payload.id = payload.sub;
+      }
       return payload;
     } catch {
       return null;

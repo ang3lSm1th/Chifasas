@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store';
+import { setCredentials } from '@/store/slices/authSlice';
 import { pushCashierTicket } from '@/store/slices/kdsSlice';
 import {
+  useLoginMutation,
   useGetCurrentShiftQuery,
   useOpenShiftMutation,
   useCloseShiftMutation,
@@ -28,6 +30,8 @@ import {
   BarChart3,
   X,
   Printer,
+  Lock,
+  User,
 } from 'lucide-react';
 
 type PaymentMethodOption = 'CASH' | 'YAPE' | 'PLIN' | 'CARD';
@@ -35,9 +39,16 @@ type ReceiptTypeOption = 'TICKET' | 'BOLETA' | 'FACTURA';
 
 export default function TurnoCajaPage() {
   const dispatch = useDispatch();
-  const { user, tenantId } = useSelector((state: RootState) => state.auth);
+  const { user, token, tenantId, isAuthenticated } = useSelector((state: RootState) => state.auth);
   const effectiveTenantId = tenantId || 'chifa-mariana';
   const liveCashierFeed = useSelector((state: RootState) => state.kds.cashierFeed);
+
+  const [hasClientToken, setHasClientToken] = useState(false);
+
+  useEffect(() => {
+    const stored = typeof window !== 'undefined' ? localStorage.getItem('chifa_token') : null;
+    setHasClientToken(Boolean(token || stored));
+  }, [token, isAuthenticated]);
 
   const { data: shiftData, refetch: refetchShift } = useGetCurrentShiftQuery(undefined, {
     pollingInterval: 15000,
@@ -57,6 +68,7 @@ export default function TurnoCajaPage() {
     activeShift?.id ? { shiftId: String(activeShift.id) } : undefined,
   );
 
+  const [loginMutation, { isLoading: isLoggingIn }] = useLoginMutation();
   const [openShift, { isLoading: isOpening }] = useOpenShiftMutation();
   const [closeShift, { isLoading: isClosing }] = useCloseShiftMutation();
   const [processPayment, { isLoading: isPaying }] = useProcessPaymentMutation();
@@ -64,6 +76,11 @@ export default function TurnoCajaPage() {
   // Modales de Turno
   const [showOpenModal, setShowOpenModal] = useState(false);
   const [showCloseModal, setShowCloseModal] = useState(false);
+
+  // Credenciales rápidas si la sesión no estaba activa en el navegador
+  const [quickUsername, setQuickUsername] = useState('admin');
+  const [quickPassword, setQuickPassword] = useState('');
+  const [needsQuickAuth, setNeedsQuickAuth] = useState(false);
 
   // Modales de Cobranza POS, Pre-Cuenta y Comprobante Emitido
   const [selectedOrderForPreBill, setSelectedOrderForPreBill] = useState<any | null>(null);
@@ -86,12 +103,6 @@ export default function TurnoCajaPage() {
   const [operationCode, setOperationCode] = useState<string>('');
   const [customerDocument, setCustomerDocument] = useState<string>('');
   const [customerName, setCustomerName] = useState<string>('');
-
-  useEffect(() => {
-    if (shiftData?.shift?.expectedCash !== undefined) {
-      setDeclaredCash(Number(shiftData.shift.expectedCash));
-    }
-  }, [shiftData]);
 
   // Suscripción en tiempo real a la Sala Inmutable de Caja
   useEffect(() => {
@@ -243,6 +254,26 @@ export default function TurnoCajaPage() {
     }
 
     try {
+      // Si el usuario no tenía token guardado o se requiere re-autenticación rápida
+      if ((!hasClientToken || needsQuickAuth) && quickPassword.trim()) {
+        const authRes = await loginMutation({
+          username: quickUsername.trim(),
+          password: quickPassword,
+          tenantId: effectiveTenantId,
+        }).unwrap();
+
+        dispatch(
+          setCredentials({
+            user: authRes.user,
+            accessToken: authRes.accessToken,
+            tenantId: effectiveTenantId,
+          }),
+        );
+        setHasClientToken(true);
+        setNeedsQuickAuth(false);
+        setQuickPassword('');
+      }
+
       await openShift({
         initialCash: Number(initialCash),
         notes: openNotes.trim() || undefined,
@@ -252,8 +283,17 @@ export default function TurnoCajaPage() {
       setShowOpenModal(false);
       setOpenNotes('');
       refetchShift();
+      refetchOrders();
+      refetchPayments();
     } catch (err: any) {
-      toast.error(err?.data?.message || 'Error al abrir el turno de caja.');
+      if (err?.status === 401) {
+        setNeedsQuickAuth(true);
+        toast.error(
+          'Sesión no detectada o expirada. Ingresa tu usuario y contraseña abajo para autorizar la apertura.',
+        );
+      } else {
+        toast.error(err?.data?.message || 'Error al abrir el turno de caja.');
+      }
     }
   };
 
@@ -265,6 +305,25 @@ export default function TurnoCajaPage() {
     }
 
     try {
+      if ((!hasClientToken || needsQuickAuth) && quickPassword.trim()) {
+        const authRes = await loginMutation({
+          username: quickUsername.trim(),
+          password: quickPassword,
+          tenantId: effectiveTenantId,
+        }).unwrap();
+
+        dispatch(
+          setCredentials({
+            user: authRes.user,
+            accessToken: authRes.accessToken,
+            tenantId: effectiveTenantId,
+          }),
+        );
+        setHasClientToken(true);
+        setNeedsQuickAuth(false);
+        setQuickPassword('');
+      }
+
       await closeShift({
         declaredCash: Number(declaredCash),
         notes: closeNotes.trim() || undefined,
@@ -277,7 +336,14 @@ export default function TurnoCajaPage() {
       setCloseNotes('');
       refetchShift();
     } catch (err: any) {
-      toast.error(err?.data?.message || 'Error al cerrar el turno.');
+      if (err?.status === 401) {
+        setNeedsQuickAuth(true);
+        toast.error(
+          'Sesión no detectada o expirada. Ingresa tu usuario y contraseña para autorizar el cierre.',
+        );
+      } else {
+        toast.error(err?.data?.message || 'Error al cerrar el turno.');
+      }
     }
   };
 
@@ -319,7 +385,9 @@ export default function TurnoCajaPage() {
           <p className="text-sm text-[#757681] mt-1">
             Restaurante:{' '}
             <span className="text-[#F8FAFC] font-medium">{effectiveTenantId}</span> | Operador:{' '}
-            <span className="text-[#F8FAFC] font-medium">{user?.fullName || 'Personal'}</span>
+            <span className="text-[#F8FAFC] font-medium">
+              {user?.fullName || (hasClientToken ? 'Autenticado' : 'Sin sesión activa')}
+            </span>
           </p>
         </div>
 
@@ -392,7 +460,10 @@ export default function TurnoCajaPage() {
               </button>
             ) : (
               <button
-                onClick={() => setShowCloseModal(true)}
+                onClick={() => {
+                  setDeclaredCash(Number(activeShift?.expectedCash ?? 0));
+                  setShowCloseModal(true);
+                }}
                 className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-[#D97706] hover:bg-[#B45309] text-white font-medium text-sm transition-all duration-150 active:scale-97 shadow-lg shadow-[#D97706]/20 flex items-center justify-center gap-2"
               >
                 <span>⏹</span> Arqueo & Cerrar Turno
@@ -1133,6 +1204,39 @@ export default function TurnoCajaPage() {
             </div>
 
             <form onSubmit={handleOpenShift} className="flex flex-col gap-4">
+              {(!hasClientToken || needsQuickAuth) && (
+                <div className="p-3.5 rounded-xl bg-[#0B0F17] border border-[#2563EB]/40 space-y-3">
+                  <p className="text-xs font-semibold text-[#60A5FA] flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5" />
+                    Autorización de Operador (Admin / Cajero)
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="relative">
+                      <User className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-[#757681]" />
+                      <input
+                        type="text"
+                        required
+                        placeholder="Usuario (ej. admin)"
+                        value={quickUsername}
+                        onChange={(e) => setQuickUsername(e.target.value)}
+                        className="w-full bg-[#131823] border border-[#20293A] rounded-lg pl-8 pr-2.5 py-2 text-xs text-[#F8FAFC] focus:outline-none focus:border-[#2563EB]"
+                      />
+                    </div>
+                    <div className="relative">
+                      <Lock className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-[#757681]" />
+                      <input
+                        type="password"
+                        required
+                        placeholder="Contraseña"
+                        value={quickPassword}
+                        onChange={(e) => setQuickPassword(e.target.value)}
+                        className="w-full bg-[#131823] border border-[#20293A] rounded-lg pl-8 pr-2.5 py-2 text-xs text-[#F8FAFC] focus:outline-none focus:border-[#2563EB]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-semibold text-[#757681] uppercase mb-1">
                   Fondo Inicial de Caja (Efectivo S/)
@@ -1190,10 +1294,10 @@ export default function TurnoCajaPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={isOpening}
+                  disabled={isOpening || isLoggingIn}
                   className="flex-1 py-2.5 rounded-lg bg-[#10B981] hover:bg-[#059669] text-white text-sm font-semibold transition-all active:scale-97 disabled:opacity-50"
                 >
-                  {isOpening ? 'Aperturando...' : 'Confirmar Apertura'}
+                  {isOpening || isLoggingIn ? 'Aperturando...' : 'Confirmar Apertura'}
                 </button>
               </div>
             </form>
@@ -1218,6 +1322,33 @@ export default function TurnoCajaPage() {
             </div>
 
             <form onSubmit={handleCloseShift} className="flex flex-col gap-4">
+              {(!hasClientToken || needsQuickAuth) && (
+                <div className="p-3.5 rounded-xl bg-[#0B0F17] border border-[#D97706]/40 space-y-3">
+                  <p className="text-xs font-semibold text-[#D97706] flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5" />
+                    Autorización de Operador (Admin / Cajero)
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      required
+                      placeholder="Usuario (ej. admin)"
+                      value={quickUsername}
+                      onChange={(e) => setQuickUsername(e.target.value)}
+                      className="w-full bg-[#131823] border border-[#20293A] rounded-lg px-2.5 py-2 text-xs text-[#F8FAFC]"
+                    />
+                    <input
+                      type="password"
+                      required
+                      placeholder="Contraseña"
+                      value={quickPassword}
+                      onChange={(e) => setQuickPassword(e.target.value)}
+                      className="w-full bg-[#131823] border border-[#20293A] rounded-lg px-2.5 py-2 text-xs text-[#F8FAFC]"
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Resumen de Caja al Centavo */}
               <div className="p-3.5 rounded-lg bg-[#0B0F17] border border-[#20293A] space-y-1.5 text-xs">
                 <div className="flex justify-between">
@@ -1320,10 +1451,10 @@ export default function TurnoCajaPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={isClosing}
+                  disabled={isClosing || isLoggingIn}
                   className="flex-1 py-2.5 rounded-lg bg-[#D97706] hover:bg-[#B45309] text-white text-sm font-semibold transition-all active:scale-97 disabled:opacity-50"
                 >
-                  {isClosing ? 'Cerrando...' : 'Confirmar Cierre de Turno'}
+                  {isClosing || isLoggingIn ? 'Cerrando...' : 'Confirmar Cierre de Turno'}
                 </button>
               </div>
             </form>

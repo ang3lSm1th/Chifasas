@@ -36,7 +36,8 @@ interface PaymentRecordItem {
   receiptType: 'TICKET' | 'BOLETA' | 'FACTURA';
   paymentMethod: PaymentMethod;
   amount: number;
-  receivedAmount: number;
+  cashReceived?: number | null;
+  receivedAmount?: number | null;
   changeGiven: number;
   operationCode: string | null;
   customerDocument: string | null;
@@ -82,18 +83,31 @@ export default function AuditoriaFinancieraPage() {
     refetch,
   } = useGetFinancialAuditQuery({
     shiftId: selectedShiftId || undefined,
-    startDate: startDate ? new Date(`${startDate}T00:00:00`).toISOString() : undefined,
-    endDate: endDate ? new Date(`${endDate}T23:59:59`).toISOString() : undefined,
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
   });
 
-  const summary = auditData?.summary ?? {
-    totalRevenue: 0,
-    totalTransactions: 0,
-    averageTicket: 0,
-    cashRevenue: 0,
-    digitalRevenue: 0,
-    byPaymentMethod: { CASH: 0, YAPE: 0, PLIN: 0, CARD: 0 },
-    byReceiptType: { TICKET: 0, BOLETA: 0, FACTURA: 0 },
+  const rawSummary = auditData?.summary;
+  const breakdownMethods = auditData?.paymentMethodsBreakdown;
+  const breakdownReceipts = auditData?.receiptsBreakdown;
+
+  const summary = {
+    totalRevenue: Number(rawSummary?.totalRevenue ?? 0),
+    totalTransactions: Number(rawSummary?.totalTransactions ?? 0),
+    averageTicket: Number(rawSummary?.averageTicket ?? 0),
+    cashRevenue: Number(rawSummary?.cashRevenue ?? 0),
+    digitalRevenue: Number(rawSummary?.digitalRevenue ?? 0),
+    byPaymentMethod: {
+      CASH: Number(rawSummary?.byPaymentMethod?.CASH ?? breakdownMethods?.CASH?.total ?? 0),
+      YAPE: Number(rawSummary?.byPaymentMethod?.YAPE ?? breakdownMethods?.YAPE?.total ?? 0),
+      PLIN: Number(rawSummary?.byPaymentMethod?.PLIN ?? breakdownMethods?.PLIN?.total ?? 0),
+      CARD: Number(rawSummary?.byPaymentMethod?.CARD ?? breakdownMethods?.CARD?.total ?? 0),
+    },
+    byReceiptType: {
+      TICKET: Number(rawSummary?.byReceiptType?.TICKET ?? breakdownReceipts?.TICKET?.total ?? 0),
+      BOLETA: Number(rawSummary?.byReceiptType?.BOLETA ?? breakdownReceipts?.BOLETA?.total ?? 0),
+      FACTURA: Number(rawSummary?.byReceiptType?.FACTURA ?? breakdownReceipts?.FACTURA?.total ?? 0),
+    },
   };
 
   const productRanking: ProductRankingItem[] = auditData?.productSalesRanking ?? [];
@@ -556,7 +570,9 @@ export default function AuditoriaFinancieraPage() {
                   </thead>
                   <tbody className="divide-y divide-white/[0.05] text-sm">
                     {recentPayments.map((payment: PaymentRecordItem) => {
-                      const meta = PAYMENT_LABELS[payment.paymentMethod];
+                      const meta = PAYMENT_LABELS[payment.paymentMethod] || PAYMENT_LABELS.CASH;
+                      const received =
+                        payment.cashReceived ?? payment.receivedAmount ?? payment.amount;
                       return (
                         <tr
                           key={payment.id}
@@ -580,7 +596,7 @@ export default function AuditoriaFinancieraPage() {
                             {payment.customerDocument ? ` • Doc: ${payment.customerDocument}` : ''}
                           </td>
                           <td className="py-3.5 px-4 text-right font-mono text-xs text-[#94A3B8]">
-                            S/ {Number(payment.receivedAmount).toFixed(2)}
+                            S/ {Number(received).toFixed(2)}
                           </td>
                           <td className="py-3.5 px-4 text-right font-mono text-xs text-[#D97706]">
                             S/ {Number(payment.changeGiven).toFixed(2)}

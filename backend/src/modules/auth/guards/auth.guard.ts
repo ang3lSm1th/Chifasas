@@ -23,11 +23,19 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('Sesión inválida o expirada');
     }
 
-    // Aislamiento Multi-Tenant: Si el request especificó tenant y el token es de otro, denegar
-    if (request.tenantId && payload.tenantId !== payload.tenantId) {
+    // Aislamiento Multi-Tenant: Si la cabecera especificó otro tenant distinto al del token, denegar
+    const headerTenantId = request.headers?.['x-tenant-id'];
+    if (
+      headerTenantId &&
+      payload.tenantId &&
+      headerTenantId !== payload.tenantId &&
+      payload.role !== 'SUPER_ADMIN'
+    ) {
       throw new UnauthorizedException('El token no pertenece al restaurante especificado');
     }
 
+    payload.id = payload.id || payload.sub;
+    request.tenantId = payload.tenantId;
     request.user = payload;
     return true;
   }

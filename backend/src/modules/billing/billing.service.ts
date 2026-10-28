@@ -271,9 +271,17 @@ export class BillingService {
     if (filters?.shiftId) {
       paymentWhere.shiftId = filters.shiftId;
     } else if (filters?.startDate && filters?.endDate) {
-      const start = new Date(`${filters.startDate}T00:00:00.000Z`);
-      const end = new Date(`${filters.endDate}T23:59:59.999Z`);
-      paymentWhere.paidAt = Between(start, end);
+      const startStr = filters.startDate.includes('T')
+        ? filters.startDate
+        : `${filters.startDate}T00:00:00.000Z`;
+      const endStr = filters.endDate.includes('T')
+        ? filters.endDate
+        : `${filters.endDate}T23:59:59.999Z`;
+      const start = new Date(startStr);
+      const end = new Date(endStr);
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+        paymentWhere.paidAt = Between(start, end);
+      }
     }
 
     const payments = await this.paymentRepository.find({
@@ -386,6 +394,21 @@ export class BillingService {
       take: 30,
     });
 
+    const receiptsBreakdown = {
+      TICKET: {
+        count: byReceiptType.TICKET.count,
+        total: Number((byReceiptType.TICKET.totalCents / 100).toFixed(2)),
+      },
+      BOLETA: {
+        count: byReceiptType.BOLETA.count,
+        total: Number((byReceiptType.BOLETA.totalCents / 100).toFixed(2)),
+      },
+      FACTURA: {
+        count: byReceiptType.FACTURA.count,
+        total: Number((byReceiptType.FACTURA.totalCents / 100).toFixed(2)),
+      },
+    };
+
     return {
       summary: {
         totalRevenue,
@@ -393,22 +416,20 @@ export class BillingService {
         digitalRevenue: Number((digitalTotalCents / 100).toFixed(2)),
         totalTransactions,
         averageTicket,
+        byPaymentMethod: {
+          CASH: paymentMethodsBreakdown.CASH.total,
+          YAPE: paymentMethodsBreakdown.YAPE.total,
+          PLIN: paymentMethodsBreakdown.PLIN.total,
+          CARD: paymentMethodsBreakdown.CARD.total,
+        },
+        byReceiptType: {
+          TICKET: receiptsBreakdown.TICKET.total,
+          BOLETA: receiptsBreakdown.BOLETA.total,
+          FACTURA: receiptsBreakdown.FACTURA.total,
+        },
       },
       paymentMethodsBreakdown,
-      receiptsBreakdown: {
-        TICKET: {
-          count: byReceiptType.TICKET.count,
-          total: Number((byReceiptType.TICKET.totalCents / 100).toFixed(2)),
-        },
-        BOLETA: {
-          count: byReceiptType.BOLETA.count,
-          total: Number((byReceiptType.BOLETA.totalCents / 100).toFixed(2)),
-        },
-        FACTURA: {
-          count: byReceiptType.FACTURA.count,
-          total: Number((byReceiptType.FACTURA.totalCents / 100).toFixed(2)),
-        },
-      },
+      receiptsBreakdown,
       productSalesRanking,
       shiftsAudit: shiftsHistory.map((s) => ({
         id: s.id,

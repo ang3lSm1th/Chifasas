@@ -43,10 +43,10 @@ export class ShiftsController {
    * Restringido a Administradores y Cajeros
    */
   @Post('open')
-  @Roles(RoleType.ADMIN, RoleType.CAJERO)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.ADMIN, RoleType.CAJERO)
   async openShift(@Request() req: any, @Body() dto: OpenShiftDto) {
     const tenantId = req.user.tenantId;
-    const userId = req.user.id;
+    const userId = req.user.id || req.user.sub;
     return this.shiftsService.openShift(tenantId, userId, dto);
   }
 
@@ -55,10 +55,10 @@ export class ShiftsController {
    * Restringido a Administradores y Cajeros
    */
   @Post('close')
-  @Roles(RoleType.ADMIN, RoleType.CAJERO)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.ADMIN, RoleType.CAJERO)
   async closeShift(@Request() req: any, @Body() dto: CloseShiftDto) {
     const tenantId = req.user.tenantId;
-    const userId = req.user.id;
+    const userId = req.user.id || req.user.sub;
     return this.shiftsService.closeShift(tenantId, userId, dto);
   }
 }

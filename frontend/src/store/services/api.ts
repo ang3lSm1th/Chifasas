@@ -24,10 +24,16 @@ export const chifaApi = createApi({
   reducerPath: 'chifaApi',
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1',
+    credentials: 'include',
     prepareHeaders: (headers, { getState }) => {
       const state = getState() as RootState;
-      const token = state.auth.token;
-      const tenantId = state.auth.tenantId;
+      const fallbackToken =
+        typeof window !== 'undefined' ? localStorage.getItem('chifa_token') : null;
+      const fallbackTenant =
+        typeof window !== 'undefined' ? localStorage.getItem('chifa_tenant_id') : null;
+
+      const token = state.auth.token || fallbackToken;
+      const tenantId = state.auth.tenantId || fallbackTenant || 'chifa-mariana';
 
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);

@@ -24,7 +24,7 @@ export class InventoryController {
   @Roles(RoleType.ADMIN, RoleType.CAJERO, RoleType.MESERA)
   async deduct(@Request() req: any, @Body() dto: DeductStockDto) {
     const tenantId = req.user.tenantId;
-    const userId = req.user.id;
+    const userId = req.user.id || req.user.sub;
     return this.inventoryService.deductStock(tenantId, userId, dto);
   }
 
@@ -32,7 +32,7 @@ export class InventoryController {
   @Roles(RoleType.ADMIN)
   async restock(@Request() req: any, @Body() dto: RestockDto) {
     const tenantId = req.user.tenantId;
-    const userId = req.user.id;
+    const userId = req.user.id || req.user.sub;
     return this.inventoryService.restock(tenantId, userId, dto);
   }
 

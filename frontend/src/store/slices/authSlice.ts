@@ -34,17 +34,64 @@ export const authSlice = createSlice({
       state.token = action.payload.accessToken;
       state.tenantId = action.payload.tenantId;
       state.isAuthenticated = true;
+
+      if (typeof window !== 'undefined') {
+        try {
+          if (action.payload.accessToken) {
+            localStorage.setItem('chifa_token', action.payload.accessToken);
+          }
+          localStorage.setItem('chifa_user', JSON.stringify(action.payload.user));
+          localStorage.setItem('chifa_tenant_id', action.payload.tenantId);
+        } catch {
+          // Ignore storage errors
+        }
+      }
+    },
+    hydrateAuth: (state) => {
+      if (typeof window !== 'undefined') {
+        try {
+          const savedToken = localStorage.getItem('chifa_token');
+          const savedUserStr = localStorage.getItem('chifa_user');
+          const savedTenant = localStorage.getItem('chifa_tenant_id');
+
+          if (savedTenant) {
+            state.tenantId = savedTenant;
+          }
+          if (savedToken && savedUserStr) {
+            state.token = savedToken;
+            state.user = JSON.parse(savedUserStr);
+            state.isAuthenticated = true;
+          }
+        } catch {
+          // Ignore storage errors
+        }
+      }
     },
     setTenantId: (state, action: PayloadAction<string>) => {
       state.tenantId = action.payload;
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('chifa_tenant_id', action.payload);
+        } catch {
+          // Ignore storage errors
+        }
+      }
     },
     logout: (state) => {
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.removeItem('chifa_token');
+          localStorage.removeItem('chifa_user');
+        } catch {
+          // Ignore storage errors
+        }
+      }
     },
   },
 });
 
-export const { setCredentials, setTenantId, logout } = authSlice.actions;
+export const { setCredentials, hydrateAuth, setTenantId, logout } = authSlice.actions;
 export default authSlice.reducer;

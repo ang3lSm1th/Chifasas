@@ -64,3 +64,9 @@
 - **Error**: `Next.js encountered the unstable value Date.now() in a Client Component` al usar hooks de RTK Query (`useGetCurrentShiftQuery`, etc.).
 - **Causa Raíz**: `cacheComponents: true` en `next.config.ts` bloquea llamadas internas a `Date.now()` de Redux Toolkit Query durante el render inicial.
 - **Regla de Prevención**: Mantener `cacheComponents: false` y definir `turbopack.root` en `frontend/next.config.ts`.
+---
+
+### [2026-10-25] [TenantContextInterceptor en WebSockets & Persistencia Auth]
+- **Error**: `TypeError: Cannot read properties of undefined (reading 'x-tenant-id')` en `KdsGateway` y error `Token de autenticación no proporcionado` al recargar `/caja/turno`.
+- **Causa Raíz**: `TenantContextInterceptor` asumía contexto HTTP en eventos WS (`context.getType() === 'ws'`); `fetchBaseQuery` carecía de `credentials: 'include'` + hidratación `localStorage`, y `tokenPayload` omitía `id`.
+- **Regla de Prevención**: Validar siempre `context.getType() === 'ws'` en interceptores globales, incluir `id` y `sub` en el JWT, y persistir token en `localStorage` + `credentials: 'include'` en RTK Query.

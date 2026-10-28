@@ -33,7 +33,7 @@ export class UsersController {
     const tenantId = req.user.tenantId;
     const created = await this.usersService.create(tenantId, createUserDto);
     // Excluir hash de la respuesta
-    const { passwordHash, ...safeUser } = created;
+    const { passwordHash: _passwordHash, ...safeUser } = created;
     return safeUser;
   }
 
