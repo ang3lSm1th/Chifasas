@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -108,44 +108,6 @@ export default function KdsStationsPage() {
           </div>
         </div>
 
-        {/* Navegación Rápida */}
-        <div className="flex items-center gap-2">
-          <Link
-            href="/admin/carta"
-            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-700 bg-gray-800/40 text-xs text-gray-300 hover:text-white hover:bg-gray-800 transition active:scale-[0.97]"
-          >
-            <UtensilsCrossed className="w-3.5 h-3.5" />
-            Carta
-          </Link>
-          <Link
-            href="/admin/inventario"
-            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-700 bg-gray-800/40 text-xs text-gray-300 hover:text-white hover:bg-gray-800 transition active:scale-[0.97]"
-          >
-            <PackageCheck className="w-3.5 h-3.5" />
-            Bebidas
-          </Link>
-          <Link
-            href="/caja/turno"
-            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-700 bg-gray-800/40 text-xs text-gray-300 hover:text-white hover:bg-gray-800 transition active:scale-[0.97]"
-          >
-            <CreditCard className="w-3.5 h-3.5" />
-            Caja
-          </Link>
-          <Link
-            href="/admin/trabajadores"
-            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-700 bg-gray-800/40 text-xs text-gray-300 hover:text-white hover:bg-gray-800 transition active:scale-[0.97]"
-          >
-            <Users className="w-3.5 h-3.5" />
-            Personal
-          </Link>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-400 hover:bg-red-500/20 transition active:scale-[0.97]"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            Salir
-          </button>
-        </div>
       </header>
 
       {/* Contenido Principal */}

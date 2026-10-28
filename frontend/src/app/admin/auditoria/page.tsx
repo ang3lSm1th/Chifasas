@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -86,14 +86,26 @@ export default function AuditoriaFinancieraPage() {
     endDate: endDate ? new Date(`${endDate}T23:59:59`).toISOString() : undefined,
   });
 
-  const summary = auditData?.summary ?? {
-    totalRevenue: 0,
-    totalTransactions: 0,
-    averageTicket: 0,
-    cashRevenue: 0,
-    digitalRevenue: 0,
-    byPaymentMethod: { CASH: 0, YAPE: 0, PLIN: 0, CARD: 0 },
-    byReceiptType: { TICKET: 0, BOLETA: 0, FACTURA: 0 },
+  const baseSummary = auditData?.summary;
+  const paymentsBreakdown = auditData?.paymentMethodsBreakdown;
+  const receiptsBreakdown = auditData?.receiptsBreakdown;
+  const summary = {
+    totalRevenue: baseSummary?.totalRevenue ?? 0,
+    totalTransactions: baseSummary?.totalTransactions ?? 0,
+    averageTicket: baseSummary?.averageTicket ?? 0,
+    cashRevenue: baseSummary?.cashRevenue ?? 0,
+    digitalRevenue: baseSummary?.digitalRevenue ?? 0,
+    byPaymentMethod: {
+      CASH: paymentsBreakdown?.CASH?.total ?? 0,
+      YAPE: paymentsBreakdown?.YAPE?.total ?? 0,
+      PLIN: paymentsBreakdown?.PLIN?.total ?? 0,
+      CARD: paymentsBreakdown?.CARD?.total ?? 0,
+    } as Record<string, number>,
+    byReceiptType: {
+      TICKET: receiptsBreakdown?.TICKET?.total ?? 0,
+      BOLETA: receiptsBreakdown?.BOLETA?.total ?? 0,
+      FACTURA: receiptsBreakdown?.FACTURA?.total ?? 0,
+    },
   };
 
   const productRanking: ProductRankingItem[] = auditData?.productSalesRanking ?? [];
@@ -125,32 +137,6 @@ export default function AuditoriaFinancieraPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <Link
-            href="/caja/turno"
-            className="min-h-[44px] px-4 py-2.5 rounded-lg bg-[#2563EB] hover:bg-blue-600 text-xs font-medium text-white transition-all duration-150 active:scale-[0.98] flex items-center"
-          >
-            Terminal POS Caja
-          </Link>
-          <Link
-            href="/comandero"
-            className="min-h-[44px] px-3.5 py-2.5 rounded-lg bg-[#131823] hover:bg-[#1A2234] border border-white/[0.08] text-xs font-medium text-[#94A3B8] hover:text-[#F8FAFC] transition-all duration-150 flex items-center"
-          >
-            Comandero Salón
-          </Link>
-          <Link
-            href="/admin/carta"
-            className="min-h-[44px] px-3.5 py-2.5 rounded-lg bg-[#131823] hover:bg-[#1A2234] border border-white/[0.08] text-xs font-medium text-[#94A3B8] hover:text-[#F8FAFC] transition-all duration-150 flex items-center"
-          >
-            Carta & Precios
-          </Link>
-          <Link
-            href="/admin/inventario"
-            className="min-h-[44px] px-3.5 py-2.5 rounded-lg bg-[#131823] hover:bg-[#1A2234] border border-white/[0.08] text-xs font-medium text-[#94A3B8] hover:text-[#F8FAFC] transition-all duration-150 flex items-center"
-          >
-            Inventario Kardex
-          </Link>
-        </div>
       </header>
 
       {/* Barra de Filtros de Auditoría */}
