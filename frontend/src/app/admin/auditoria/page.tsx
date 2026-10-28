@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -139,32 +139,6 @@ export default function AuditoriaFinancieraPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <Link
-            href="/caja/turno"
-            className="min-h-[44px] px-4 py-2.5 rounded-lg bg-[#2563EB] hover:bg-blue-600 text-xs font-medium text-white transition-all duration-150 active:scale-[0.98] flex items-center"
-          >
-            Terminal POS Caja
-          </Link>
-          <Link
-            href="/comandero"
-            className="min-h-[44px] px-3.5 py-2.5 rounded-lg bg-[#131823] hover:bg-[#1A2234] border border-white/[0.08] text-xs font-medium text-[#94A3B8] hover:text-[#F8FAFC] transition-all duration-150 flex items-center"
-          >
-            Comandero Salón
-          </Link>
-          <Link
-            href="/admin/carta"
-            className="min-h-[44px] px-3.5 py-2.5 rounded-lg bg-[#131823] hover:bg-[#1A2234] border border-white/[0.08] text-xs font-medium text-[#94A3B8] hover:text-[#F8FAFC] transition-all duration-150 flex items-center"
-          >
-            Carta & Precios
-          </Link>
-          <Link
-            href="/admin/inventario"
-            className="min-h-[44px] px-3.5 py-2.5 rounded-lg bg-[#131823] hover:bg-[#1A2234] border border-white/[0.08] text-xs font-medium text-[#94A3B8] hover:text-[#F8FAFC] transition-all duration-150 flex items-center"
-          >
-            Inventario Kardex
-          </Link>
-        </div>
       </header>
 
       {/* Barra de Filtros de Auditoría */}
@@ -620,3 +594,4 @@ export default function AuditoriaFinancieraPage() {
     </main>
   );
 }
+

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
@@ -414,33 +414,6 @@ export default function ComanderoMobilePage() {
               {isConnectedWs ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
               <span className="hidden sm:inline">{isConnectedWs ? 'SYNC' : 'OFFLINE'}</span>
             </div>
-
-            <Link
-              href="/caja/turno"
-              className="min-h-[40px] px-2.5 py-1.5 rounded-xl bg-[#1A2234] hover:bg-[#20293A] border border-[#20293A] text-xs text-[#94A3B8] hover:text-[#F8FAFC] flex items-center gap-1.5 transition active:scale-[0.97]"
-              title="Ir a Caja y Turnos"
-            >
-              <CreditCard className="w-4 h-4 text-[#10B981]" />
-              <span className="hidden md:inline">Caja</span>
-            </Link>
-
-            {(user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') && (
-              <Link
-                href="/admin/carta"
-                className="min-h-[40px] px-2.5 py-1.5 rounded-xl bg-[#1A2234] hover:bg-[#20293A] border border-[#20293A] text-xs text-[#94A3B8] hover:text-[#F8FAFC] hidden sm:flex items-center gap-1.5 transition active:scale-[0.97]"
-              >
-                <UtensilsCrossed className="w-4 h-4 text-[#D97706]" />
-                <span className="hidden md:inline">Carta</span>
-              </Link>
-            )}
-
-            <button
-              onClick={handleLogout}
-              className="min-h-[40px] min-w-[40px] p-2 rounded-xl bg-[#1A2234] hover:bg-red-500/20 border border-[#20293A] text-[#94A3B8] hover:text-red-400 flex items-center justify-center transition active:scale-[0.97]"
-              title="Cerrar Sesión"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
           </div>
         </div>
       </header>

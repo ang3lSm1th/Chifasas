@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
@@ -391,41 +391,6 @@ export default function TurnoCajaPage() {
           </p>
         </div>
 
-        {/* Accesos Rápidos */}
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <Link
-            href="/comandero"
-            className="px-4 py-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold flex items-center gap-1.5 transition-all duration-150 active:scale-[0.97] shadow-lg shadow-[#2563EB]/20"
-          >
-            <Smartphone className="w-4 h-4" />
-            Comandero Móvil
-          </Link>
-          <Link
-            href="/admin/auditoria"
-            className="px-3.5 py-2 rounded-xl bg-[#10B981]/15 hover:bg-[#10B981]/25 border border-[#10B981]/30 text-xs font-semibold text-[#10B981] flex items-center gap-1.5 transition-all duration-150 active:scale-[0.97]"
-          >
-            <BarChart3 className="w-4 h-4" />
-            Auditoría & Ventas
-          </Link>
-          <Link
-            href="/admin/carta"
-            className="px-3.5 py-2 rounded-lg bg-[#131823] hover:bg-[#1A2234] border border-[#20293A] text-xs text-[#94A3B8] hover:text-[#F8FAFC] transition-all duration-150 active:scale-[0.97]"
-          >
-            Carta
-          </Link>
-          <Link
-            href="/admin/trabajadores"
-            className="px-3.5 py-2 rounded-lg bg-[#131823] hover:bg-[#1A2234] border border-[#20293A] text-xs text-[#94A3B8] hover:text-[#F8FAFC] transition-all duration-150 active:scale-[0.97]"
-          >
-            Personal
-          </Link>
-          <Link
-            href="/login"
-            className="px-3.5 py-2 rounded-lg bg-[#131823] hover:bg-[#1A2234] border border-[#20293A] text-xs text-[#94A3B8] hover:text-[#F8FAFC] transition-all duration-150 active:scale-[0.97]"
-          >
-            Cambiar Sesión
-          </Link>
-        </div>
       </header>
 
       {/* Contenido Principal */}

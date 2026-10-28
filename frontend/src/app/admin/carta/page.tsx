@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -154,37 +154,6 @@ export default function CatalogPage() {
           </div>
         </div>
 
-        {/* Barra de Navegación */}
-        <div className="flex items-center gap-2">
-          <Link
-            href="/admin/pantallas-kds"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-700 bg-gray-800/40 text-xs text-gray-300 hover:text-white hover:bg-gray-800 transition active:scale-[0.97]"
-          >
-            <MonitorPlay className="w-3.5 h-3.5 text-blue-400" />
-            Pantallas KDS
-          </Link>
-          <Link
-            href="/admin/inventario"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-700 bg-gray-800/40 text-xs text-gray-300 hover:text-white hover:bg-gray-800 transition active:scale-[0.97]"
-          >
-            <PackageCheck className="w-3.5 h-3.5 text-emerald-400" />
-            Inventario Bebidas
-          </Link>
-          <Link
-            href="/caja/turno"
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-700 bg-gray-800/40 text-xs text-gray-300 hover:text-white hover:bg-gray-800 transition active:scale-[0.97]"
-          >
-            <CreditCard className="w-3.5 h-3.5" />
-            Caja
-          </Link>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-400 hover:bg-red-500/20 transition active:scale-[0.97]"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            Salir
-          </button>
-        </div>
       </header>
 
       {/* Main Content */}

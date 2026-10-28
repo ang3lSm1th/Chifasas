@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -111,40 +111,6 @@ export default function WorkersPage() {
 
   return (
     <div className="min-h-screen bg-[#0B0F17] text-[#F8FAFC]">
-      {/* Barra de Navegación Superior - Executive Precision Dark */}
-      <header className="border-b border-[#20293A] bg-[#131823]/80 backdrop-blur-md sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#2563EB] flex items-center justify-center font-bold text-white shadow-md">
-              CM
-            </div>
-            <div>
-              <h1 className="text-base font-bold text-[#F8FAFC]">Chifa Mariana</h1>
-              <p className="text-xs text-[#94A3B8]">Restaurante: <span className="text-[#38BDF8] font-mono-numbers">{tenantId}</span></p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/caja/turno"
-              className="btn-tactile flex items-center gap-2 text-xs font-semibold text-[#10B981] hover:text-white bg-[#0B0F17] hover:bg-[#10B981]/20 px-3.5 py-2 rounded-xl border border-[#10B981]/30 cursor-pointer"
-            >
-              <span>Caja & Turnos</span>
-            </Link>
-            <div className="hidden sm:flex items-center gap-2 text-xs text-[#94A3B8] bg-[#0B0F17] px-3 py-1.5 rounded-lg border border-[#20293A]">
-              <Shield className="w-3.5 h-3.5 text-[#10B981]" />
-              <span>Rol: <strong className="text-white">{user?.role || 'ADMIN'}</strong></span>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="btn-tactile flex items-center gap-2 text-xs font-semibold text-[#94A3B8] hover:text-white bg-[#0B0F17] hover:bg-[#1A2234] px-3.5 py-2 rounded-xl border border-[#20293A] cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Cerrar Sesión</span>
-            </button>
-          </div>
-        </div>
-      </header>
 
       {/* Contenido Principal */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
